@@ -3,12 +3,13 @@
 A scalable microservices architecture for collecting and managing user feedback with authentication, rate limiting, and role-based access control.
 
 ## 🚀 Quick Start
+![API Demo](./screenshots/image.png)
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
-cd feedback-api
+git clone https://github.com/Fonate-Michael/Feedback-API-Microservices
+cd Feedback-API-Microservices
 ```
 
 ### 2. Prerequisites
@@ -176,6 +177,7 @@ go run main.go
 ```
 
 ### 6. Test the Setup
+
 
 #### Register a User
 ```bash
@@ -806,9 +808,7 @@ CREATE TABLE users (
     role VARCHAR(50) DEFAULT 'user'
 );
 
--- Indexes for performance
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_role ON users(role);
+
 
 -- Feedbacks table
 CREATE TABLE feedbacks (
@@ -819,78 +819,5 @@ CREATE TABLE feedbacks (
 );
 
 
-## 🔄 Data Flow Diagrams
-
-### User Registration Flow
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant AG as API Gateway
-    participant AS as Auth Service
-    participant DB as PostgreSQL
-
-    C->>AG: POST /auth-service/register
-    AG->>AS: POST /register (stripped path)
-    AS->>DB: INSERT INTO users (username, email, password_hash, role)
-    DB-->>AS: Success
-    AS-->>AG: 200 OK {message: "User registered successfully"}
-    AG-->>C: 200 OK {message: "User registered successfully"}
-```
-
-### User Login Flow
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant AG as API Gateway
-    participant AS as Auth Service
-    participant DB as PostgreSQL
-
-    C->>AG: POST /auth-service/login
-    AG->>AS: POST /login (stripped path)
-    AS->>DB: SELECT user WHERE email = ?
-    DB-->>AS: User data (including password hash)
-    AS->>AS: Verify password with bcrypt
-    AS->>AS: Generate JWT token
-    AS-->>AG: 200 OK {token, user_id, role}
-    AG-->>C: 200 OK {token, user_id, role}
-```
-
-### Feedback Submission Flow
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant AG as API Gateway
-    participant FS as Feedback Service
-    participant DB as PostgreSQL
-
-    C->>AG: POST /feedback-service/feedback (with JWT)
-    AG->>FS: POST /feedback (stripped path, forwarded auth)
-    FS->>FS: Validate JWT and extract user_id
-    FS->>DB: INSERT INTO feedbacks (user_id, sentiment, message)
-    DB-->>FS: Success
-    FS-->>AG: 200 OK {message: "Feedback Submitted Successfully"}
-    AG-->>C: 200 OK {message: "Feedback Submitted Successfully"}
-```
-
-### Admin View Feedback Flow
-
-```mermaid
-sequenceDiagram
-    participant C as Client (Admin)
-    participant AG as API Gateway
-    participant FS as Feedback Service
-    participant DB as PostgreSQL
-
-    C->>AG: GET /feedback-service/feedback (with Admin JWT)
-    AG->>FS: GET /feedback (stripped path, forwarded auth)
-    FS->>FS: Validate JWT and check admin role
-    FS->>DB: SELECT * FROM feedbacks
-    DB-->>FS: All feedback records
-    FS-->>AG: 200 OK [feedback_array]
-    AG-->>C: 200 OK [feedback_array]
-```
 
 
